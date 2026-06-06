@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from database import Base, SessionLocal, engine
 from models import ResumeAnalysis
-
+from services.resume_analyzer import analyze_resume
 app = FastAPI()
 
 app.add_middleware(
@@ -47,7 +47,7 @@ def extract_text_from_pdf(content: bytes) -> str:
 
 
 @app.post("/analyze-resume")
-async def analyze_resume(file: UploadFile = File(...)):
+async def analyze_resume_endpoint(file: UploadFile = File(...)):
     content = await file.read()
 
     if file.filename.lower().endswith(".pdf"):
@@ -56,43 +56,33 @@ async def analyze_resume(file: UploadFile = File(...)):
         resume_text = content.decode("utf-8", errors="ignore")
         resume_text = re.sub(r"[ \t]+", " ", resume_text).strip()
 
-    text_lower = resume_text.lower()
+    try:
+        ai_result = analyze_resume(resume_text)
 
-    strengths: List[str] = []
-    improvements: List[str] = []
+        score = ai_result.get("score", 70)
+        strengths = ai_result.get(
+            "strengths",
+            ["Resume analyzed successfully"]
+        )
+        improvements = ai_result.get(
+            "improvements",
+            ["No improvement suggestions available"]
+        )
+        summary = ai_result.get(
+            "summary",
+            "Resume analyzed successfully"
+        )
 
-    if "project" in text_lower:
-        strengths.append("Projects are mentioned in the resume")
-    else:
-        improvements.append("Add a clear project section")
+    except Exception as e:
+        print("Gemini Error:", e)
 
-    if any(skill in text_lower for skill in ["python", "java", "javascript", "c++", "sql"]):
-        strengths.append("Programming skills are visible")
-    else:
-        improvements.append("Add your core programming languages")
-
-    if any(word in text_lower for word in ["built", "developed", "created", "implemented"]):
-        strengths.append("Resume includes action-oriented language")
-    else:
-        improvements.append("Use stronger action verbs in bullet points")
-
-    if len(resume_text) < 500:
-        improvements.append("Resume content looks too short or incomplete")
-
-    score = 70 + min(len(strengths) * 5, 15) - min(len(improvements) * 3, 15)
-    score = max(40, min(score, 95))
-
-    if not strengths:
-        strengths = ["Resume was received successfully"]
-    if not improvements:
-        improvements = ["Add more measurable impact to make it stronger"]
-
-    summary = (
-        "Your resume is a good starting point, but it will become stronger "
-        "if you add measurable impact, role-specific keywords, and clearer project details."
-    )
+        score = 70
+        strengths = ["Resume uploaded successfully"]
+        improvements = ["AI analysis failed. Please try again."]
+        summary = "Fallback analysis used."
 
     db: Session = SessionLocal()
+
     try:
         record = ResumeAnalysis(
             filename=file.filename,
@@ -101,9 +91,11 @@ async def analyze_resume(file: UploadFile = File(...)):
             improvements=", ".join(improvements),
             summary=summary,
         )
+
         db.add(record)
         db.commit()
         db.refresh(record)
+
     finally:
         db.close()
 
