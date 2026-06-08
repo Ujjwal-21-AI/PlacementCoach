@@ -35,13 +35,16 @@ export default function InterviewPage() {
 
     try {
       const res = await fetch("http://127.0.0.1:8000/generate-questions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ role: selectedRole }),
-      });
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ role: selectedRole }),
+});
 
+if (!res.ok) {
+  throw new Error(`HTTP Error ${res.status}`);
+}
       const data: QuestionResponse = await res.json();
       setQuestions(data.questions || []);
       setQuestionIndex(0);
@@ -54,8 +57,16 @@ export default function InterviewPage() {
   };
 
   useEffect(() => {
-    fetchQuestions(role);
-  }, [role]);
+  const loadQuestions = async () => {
+    try {
+      await fetchQuestions(role);
+    } catch (err) {
+      console.log("Backend not available yet");
+    }
+  };
+
+  loadQuestions();
+}, [role]);
 
   const nextQuestion = () => {
     if (questions.length === 0) return;

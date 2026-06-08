@@ -11,11 +11,18 @@ from sqlalchemy.orm import Session
 from database import Base, SessionLocal, engine
 from models import ResumeAnalysis
 from services.resume_analyzer import analyze_resume
+from services.interview_service import (
+    generate_interview_questions,
+    evaluate_interview_answer
+)
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -121,56 +128,27 @@ class AnswerRequest(BaseModel):
 
 @app.post("/generate-questions")
 def generate_questions(req: InterviewRequest):
-    role_questions = {
-        "SDE": [
-            "Tell me about a project where you solved a difficult problem.",
-            "Explain the difference between Array and Linked List.",
-            "How would you optimize a slow web application?",
-        ],
-        "ML Engineer": [
-            "Tell me about an ML project you worked on.",
-            "What is overfitting and how do you handle it?",
-            "Explain the difference between classification and regression.",
-        ],
-        "Data Analyst": [
-            "Tell me about a dashboard or analysis project you built.",
-            "How do you clean messy data?",
-            "What is the difference between correlation and causation?",
-        ],
-        "Web Developer": [
-            "Tell me about a website or app you built.",
-            "What is the difference between frontend and backend?",
-            "How do you make a web app responsive?",
-        ],
-    }
 
-    questions = role_questions.get(req.role, role_questions["SDE"])
-    return {"role": req.role, "questions": questions}
+    result = generate_interview_questions(
+        req.role
+    )
+
+    return {
+        "role": req.role,
+        "questions": result["questions"]
+    }
 
 
 @app.post("/evaluate-answer")
 def evaluate_answer(req: AnswerRequest):
-    words = req.answer.strip().split()
-    length = len(words)
 
-    if length < 20:
-        feedback = (
-            "Your answer is too short. Use structure: intro → explanation → example → conclusion."
-        )
-        score = 55
-    elif length < 50:
-        feedback = "Good start. Add one real example and a stronger closing summary."
-        score = 75
-    else:
-        feedback = "Strong answer. It is detailed and well-structured. Keep it concise and confident."
-        score = 90
+    result = evaluate_interview_answer(
+        req.role,
+        req.question,
+        req.answer
+    )
 
-    return {
-        "role": req.role,
-        "question": req.question,
-        "score": score,
-        "feedback": feedback,
-    }
+    return result
 
 
 @app.get("/resume-history")
