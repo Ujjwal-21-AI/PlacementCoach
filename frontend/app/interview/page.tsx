@@ -11,10 +11,10 @@ type QuestionResponse = {
 };
 
 type FeedbackResponse = {
-  role: string;
-  question: string;
   score: number;
-  feedback: string;
+  strengths: string[];
+  improvements: string[];
+  better_answer: string;
 };
 
 export default function InterviewPage() {
@@ -190,17 +190,54 @@ if (!res.ok) {
             <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
               <h2 className="text-2xl font-semibold">Feedback</h2>
               {feedback ? (
-                <div className="mt-4 rounded-2xl bg-slate-900 p-5">
-                  <p className="text-sm text-cyan-300">Score: {feedback.score}/100</p>
-                  <p className="mt-3 text-sm leading-7 text-slate-300">
-                    {feedback.feedback}
-                  </p>
-                </div>
-              ) : (
-                <p className="mt-4 text-slate-400">
-                  Write your answer and click “Get Feedback”.
-                </p>
-              )}
+  <div className="mt-4 rounded-2xl bg-slate-900 p-5 space-y-5">
+
+    <div>
+      <p className="text-lg font-semibold text-cyan-300">
+        Score: {feedback.score}/100
+      </p>
+    </div>
+
+    <div>
+      <h3 className="font-semibold text-green-400">
+        Strengths
+      </h3>
+
+      <ul className="mt-2 list-disc pl-5 text-sm text-slate-300">
+        {feedback.strengths.map((item, index) => (
+          <li key={index}>{item}</li>
+        ))}
+      </ul>
+    </div>
+
+    <div>
+      <h3 className="font-semibold text-yellow-400">
+        Improvements
+      </h3>
+
+      <ul className="mt-2 list-disc pl-5 text-sm text-slate-300">
+        {feedback.improvements.map((item, index) => (
+          <li key={index}>{item}</li>
+        ))}
+      </ul>
+    </div>
+
+    <div>
+      <h3 className="font-semibold text-cyan-400">
+        Better Answer
+      </h3>
+
+      <p className="mt-2 text-sm leading-7 text-slate-300">
+        {feedback.better_answer}
+      </p>
+    </div>
+
+  </div>
+) : (
+  <p className="mt-4 text-slate-400">
+    Write your answer and click "Get Feedback".
+  </p>
+)}
             </div>
 
             <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
