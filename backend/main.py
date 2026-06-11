@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from database import Base, SessionLocal, engine
-from models import ResumeAnalysis
+from models import ResumeAnalysis, InterviewHistory
 from services.resume_analyzer import analyze_resume
 from services.interview_service import (
     generate_interview_questions,
@@ -148,6 +148,25 @@ def evaluate_answer(req: AnswerRequest):
         req.answer
     )
 
+    db: Session = SessionLocal()
+
+    try:
+        history = InterviewHistory(
+            role=req.role,
+            question=req.question,
+            answer=req.answer,
+            score=result["score"],
+            strengths=", ".join(result["strengths"]),
+            improvements=", ".join(result["improvements"]),
+            better_answer=result["better_answer"]
+        )
+
+        db.add(history)
+        db.commit()
+
+    finally:
+        db.close()
+
     return result
 
 
@@ -170,5 +189,36 @@ def resume_history():
                 }
             )
         return result
+    finally:
+        db.close()
+
+@app.get("/interview-history")
+def interview_history():
+
+    db: Session = SessionLocal()
+
+    try:
+        records = (
+            db.query(InterviewHistory)
+            .order_by(InterviewHistory.id.desc())
+            .all()
+        )
+
+        result = []
+
+        for item in records:
+            result.append({
+                "id": item.id,
+                "role": item.role,
+                "question": item.question,
+                "answer": item.answer,
+                "score": item.score,
+                "strengths": item.strengths,
+                "improvements": item.improvements,
+                "better_answer": item.better_answer
+            })
+
+        return result
+
     finally:
         db.close()
