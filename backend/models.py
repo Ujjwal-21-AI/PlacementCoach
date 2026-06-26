@@ -28,3 +28,18 @@ class InterviewHistory(Base):
     improvements = Column(Text, nullable=False)
 
     better_answer = Column(Text, nullable=False)
+
+class ATSHistory(Base):
+    __tablename__ = "ats_history"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    filename = Column(String, nullable=False)
+
+    ats_score = Column(Integer, nullable=False)
+
+    matched_skills = Column(Text, nullable=False)
+    missing_skills = Column(Text, nullable=False)
+
+    strengths = Column(Text, nullable=False)
+    suggestions = Column(Text, nullable=False)

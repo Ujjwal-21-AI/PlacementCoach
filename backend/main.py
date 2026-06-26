@@ -10,7 +10,11 @@ from sqlalchemy.orm import Session
 from services.ats_service import analyze_resume_against_jd
 
 from database import Base, SessionLocal, engine
-from models import ResumeAnalysis, InterviewHistory
+from models import (
+    ResumeAnalysis,
+    InterviewHistory,
+    ATSHistory
+)
 from services.resume_analyzer import analyze_resume
 from services.interview_service import (
     generate_interview_questions,
@@ -307,6 +311,25 @@ async def ats_match(
             job_description
         )
 
+        db: Session = SessionLocal()
+
+        try:
+
+            history = ATSHistory(
+                filename=file.filename,
+                ats_score=result["ats_score"],
+                matched_skills=", ".join(result["matched_skills"]),
+                missing_skills=", ".join(result["missing_skills"]),
+                strengths=", ".join(result["strengths"]),
+                suggestions=", ".join(result["suggestions"])
+            )
+
+            db.add(history)
+            db.commit()
+
+        finally:
+            db.close()
+
         return result
 
     except Exception as e:
@@ -322,3 +345,43 @@ async def ats_match(
                 "AI analysis failed."
             ]
         }
+
+@app.get("/ats-history")
+def ats_history():
+
+    db: Session = SessionLocal()
+
+    try:
+
+        records = (
+            db.query(ATSHistory)
+            .order_by(ATSHistory.id.desc())
+            .all()
+        )
+
+        result = []
+
+        for item in records:
+
+            result.append({
+
+                "id": item.id,
+
+                "filename": item.filename,
+
+                "ats_score": item.ats_score,
+
+                "matched_skills": item.matched_skills,
+
+                "missing_skills": item.missing_skills,
+
+                "strengths": item.strengths,
+
+                "suggestions": item.suggestions
+
+            })
+
+        return result
+
+    finally:
+        db.close()
