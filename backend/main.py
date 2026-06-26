@@ -7,6 +7,7 @@ from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from services.ats_service import analyze_resume_against_jd
 
 from database import Base, SessionLocal, engine
 from models import ResumeAnalysis, InterviewHistory
@@ -222,3 +223,102 @@ def interview_history():
 
     finally:
         db.close()
+@app.get("/dashboard")
+def dashboard():
+    db: Session = SessionLocal()
+
+    try:
+        resume_records = db.query(ResumeAnalysis).all()
+        interview_records = db.query(InterviewHistory).all()
+
+        # Resume Analytics
+        if resume_records:
+            latest_resume = (
+                db.query(ResumeAnalysis)
+                .order_by(ResumeAnalysis.id.desc())
+                .first()
+            )
+
+            average_resume = (
+                sum(r.score for r in resume_records)
+                / len(resume_records)
+            )
+        else:
+            latest_resume = None
+            average_resume = 0
+
+        # Interview Analytics
+        if interview_records:
+            latest_interview = (
+                db.query(InterviewHistory)
+                .order_by(InterviewHistory.id.desc())
+                .first()
+            )
+
+            average_interview = (
+                sum(i.score for i in interview_records)
+                / len(interview_records)
+            )
+
+            highest_interview = max(
+                i.score for i in interview_records
+            )
+        else:
+            latest_interview = None
+            average_interview = 0
+            highest_interview = 0
+
+        return {
+            "total_resumes": len(resume_records),
+            "latest_resume_score": latest_resume.score if latest_resume else 0,
+            "average_resume_score": round(average_resume, 1),
+
+            "total_interviews": len(interview_records),
+            "latest_interview_score": latest_interview.score if latest_interview else 0,
+            "average_interview_score": round(average_interview, 1),
+            "highest_interview_score": highest_interview,
+        }
+
+    finally:
+        db.close()
+
+from fastapi import Form
+
+@app.post("/ats-match")
+async def ats_match(
+    file: UploadFile = File(...),
+    job_description: str = Form(...)
+):
+
+    content = await file.read()
+
+    if file.filename.lower().endswith(".pdf"):
+        resume_text = extract_text_from_pdf(content)
+    else:
+        resume_text = content.decode(
+            "utf-8",
+            errors="ignore"
+        )
+
+    try:
+
+        result = analyze_resume_against_jd(
+            resume_text,
+            job_description
+        )
+
+        return result
+
+    except Exception as e:
+
+        print("ATS Error:", e)
+
+        return {
+            "ats_score": 70,
+            "matched_skills": [],
+            "missing_skills": [],
+            "strengths": [],
+            "suggestions": [
+                "AI analysis failed."
+            ]
+        }
