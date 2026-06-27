@@ -31,7 +31,7 @@ export default function ATSHistoryPage() {
     try {
 
       const response = await fetch(
-        "http://127.0.0.1:8000/ats-history"
+        `${process.env.NEXT_PUBLIC_API_URL}/ats-history`
       );
 
       if (!response.ok) {

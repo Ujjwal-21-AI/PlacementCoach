@@ -33,7 +33,7 @@ export default function ResumeHistoryPage() {
     try {
 
       const response = await fetch(
-        "http://127.0.0.1:8000/resume-history"
+        `${process.env.NEXT_PUBLIC_API_URL}/resume-history`
       );
 
       const data = await response.json();

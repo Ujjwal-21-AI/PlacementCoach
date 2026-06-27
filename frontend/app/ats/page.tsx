@@ -55,7 +55,7 @@ export default function ATSPage() {
       );
 
       const response = await fetch(
-        "http://127.0.0.1:8000/ats-match",
+        `${process.env.NEXT_PUBLIC_API_URL}/ats-match`,
         {
           method: "POST",
           body: formData,

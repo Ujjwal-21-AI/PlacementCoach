@@ -32,7 +32,7 @@ export default function InterviewHistoryPage() {
     try {
 
       const response = await fetch(
-        "http://127.0.0.1:8000/interview-history"
+        `${process.env.NEXT_PUBLIC_API_URL}/interview-history`
       );
 
       if (!response.ok) {

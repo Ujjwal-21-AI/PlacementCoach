@@ -51,7 +51,7 @@ export default function InterviewPage() {
       setAnswer("");
       
       const response = await fetch(
-        "http://127.0.0.1:8000/generate-questions",
+        `${process.env.NEXT_PUBLIC_API_URL}/generate-questions`,
         {
           method: "POST",
 
@@ -104,7 +104,7 @@ export default function InterviewPage() {
       setLoadingEvaluation(true);
 
       const response = await fetch(
-        "http://127.0.0.1:8000/evaluate-answer",
+        `${process.env.NEXT_PUBLIC_API_URL}/evaluate-answer`,
         {
           method: "POST",
 
