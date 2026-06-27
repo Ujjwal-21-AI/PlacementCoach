@@ -3,23 +3,22 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
-import InterviewCard from "@/components/interview-history/InterviewCard";
-import SearchBar from "@/components/interview-history/SearchBar";
+import ATSHistoryCard from "@/components/ats-history/ATSHistoryCard";
+import SearchBar from "@/components/ats-history/SearchBar";
 
-type InterviewHistory = {
+type ATSHistory = {
   id: number;
-  role: string;
-  question: string;
-  answer: string;
-  score: number;
+  filename: string;
+  ats_score: number;
+  matched_skills: string;
+  missing_skills: string;
   strengths: string;
-  improvements: string;
-  better_answer: string;
+  suggestions: string;
 };
 
-export default function InterviewHistoryPage() {
+export default function ATSHistoryPage() {
 
-  const [history, setHistory] = useState<InterviewHistory[]>([]);
+  const [history, setHistory] = useState<ATSHistory[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -32,11 +31,11 @@ export default function InterviewHistoryPage() {
     try {
 
       const response = await fetch(
-        "http://127.0.0.1:8000/interview-history"
+        "http://127.0.0.1:8000/ats-history"
       );
 
       if (!response.ok) {
-        throw new Error("Failed to fetch history");
+        throw new Error("Failed to fetch ATS history");
       }
 
       const data = await response.json();
@@ -58,7 +57,7 @@ export default function InterviewHistoryPage() {
   const filteredHistory = useMemo(() => {
 
     return history.filter((item) =>
-      item.role.toLowerCase().includes(search.toLowerCase())
+      item.filename.toLowerCase().includes(search.toLowerCase())
     );
 
   }, [history, search]);
@@ -71,7 +70,7 @@ export default function InterviewHistoryPage() {
 
         <Link
           href="/"
-          className="text-zinc-500 hover:text-white transition"
+          className="text-zinc-500 transition hover:text-white"
         >
           ← Back to Home
         </Link>
@@ -79,16 +78,16 @@ export default function InterviewHistoryPage() {
         <div className="mt-8">
 
           <p className="text-sm uppercase tracking-[0.25em] text-cyan-400">
-            Interview History
+            ATS History
           </p>
 
           <h1 className="mt-4 text-5xl font-bold">
-            Previous Interviews
+            Previous ATS Reports
           </h1>
 
-          <p className="mt-5 text-lg text-zinc-400 max-w-2xl">
-            Review your previous interview attempts,
-            AI scores and suggested answers.
+          <p className="mt-5 max-w-2xl text-lg leading-8 text-zinc-400">
+            Browse every ATS analysis you've performed and review
+            your resume compatibility reports.
           </p>
 
         </div>
@@ -121,12 +120,11 @@ export default function InterviewHistoryPage() {
               <div className="text-center">
 
                 <h2 className="text-3xl font-bold">
-                  No Interview History
+                  No ATS Reports
                 </h2>
 
                 <p className="mt-4 text-zinc-500">
-                  Complete an interview to see
-                  your history here.
+                  Analyze a resume to see ATS history here.
                 </p>
 
               </div>
@@ -139,13 +137,14 @@ export default function InterviewHistoryPage() {
 
               {filteredHistory.map((item) => (
 
-                <InterviewCard
+                <ATSHistoryCard
                   key={item.id}
-                  role={item.role}
-                  score={item.score}
-                  question={item.question}
-                  answer={item.answer}
-                  betterAnswer={item.better_answer}
+                  filename={item.filename}
+                  atsScore={item.ats_score}
+                  matchedSkills={item.matched_skills}
+                  missingSkills={item.missing_skills}
+                  strengths={item.strengths}
+                  suggestions={item.suggestions}
                 />
 
               ))}

@@ -1,41 +1,60 @@
 import json
+import re
+
 from services.gemini_service import client
+
+
+def extract_json(text: str):
+    """
+    Extract valid JSON from Gemini response.
+    """
+
+    text = text.strip()
+
+    text = re.sub(r"^```json", "", text)
+    text = re.sub(r"^```", "", text)
+    text = re.sub(r"```$", "", text)
+
+    start = text.find("{")
+    end = text.rfind("}")
+
+    if start != -1 and end != -1:
+        text = text[start:end + 1]
+
+    return json.loads(text)
 
 
 def generate_interview_questions(role: str):
 
     prompt = f"""
-Generate 5 interview questions for a {role} role.
+Generate exactly 5 interview questions for a {role} role.
 
 Return ONLY valid JSON.
 
 Format:
 
 {{
-    "questions": [
-        "question1",
-        "question2",
-        "question3",
-        "question4",
-        "question5"
+    "questions":[
+        "...",
+        "...",
+        "...",
+        "...",
+        "..."
     ]
 }}
 """
 
     try:
+
         response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=prompt
         )
 
-        text = response.text.strip()
-
-        if text.startswith("```json"):
-            text = text.replace("```json", "").replace("```", "").strip()
-
-        return json.loads(text)
+        return extract_json(response.text)
 
     except Exception as e:
+
         print("Gemini Question Error:", e)
 
         return {
@@ -58,7 +77,8 @@ def evaluate_interview_answer(
     prompt = f"""
 You are an expert technical interviewer.
 
-Role: {role}
+Role:
+{role}
 
 Question:
 {question}
@@ -71,43 +91,46 @@ Return ONLY valid JSON.
 Format:
 
 {{
-    "score": 85,
-    "strengths": [
-        "strength1",
-        "strength2"
+    "score":85,
+    "strengths":[
+        "...",
+        "..."
     ],
-    "improvements": [
-        "improvement1",
-        "improvement2"
+    "improvements":[
+        "...",
+        "..."
     ],
-    "better_answer": "improved answer"
+    "better_answer":"..."
 }}
 """
 
     try:
+
         response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=prompt
         )
 
-        text = response.text.strip()
-
-        if text.startswith("```json"):
-            text = text.replace("```json", "").replace("```", "").strip()
-
-        return json.loads(text)
+        return extract_json(response.text)
 
     except Exception as e:
+
         print("Gemini Feedback Error:", e)
 
         return {
+
             "score": 70,
+
             "strengths": [
-                "Attempted the question"
+                "Attempted the question."
             ],
+
             "improvements": [
-                "Add more details",
-                "Use examples"
+                "Use more technical details.",
+                "Support your answer with a real example."
             ],
-            "better_answer": answer
+
+            "better_answer":
+                "Use the STAR method (Situation, Task, Action, Result) and include measurable impact."
+
         }

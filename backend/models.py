@@ -1,5 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text
 from database import Base
+from sqlalchemy import DateTime
+from datetime import datetime
 
 
 class ResumeAnalysis(Base):
@@ -11,6 +13,11 @@ class ResumeAnalysis(Base):
     strengths = Column(Text, nullable=False)
     improvements = Column(Text, nullable=False)
     summary = Column(Text, nullable=False)
+
+    created_at = Column(
+        DateTime,
+        default=datetime.utcnow
+    )
 
 
 class InterviewHistory(Base):

@@ -93,9 +93,20 @@ export default function ResumePage() {
         Resume Analyzer
       </p>
 
-      <h1 className="mt-4 text-5xl font-bold tracking-tight">
-        Improve your resume with AI.
-      </h1>
+      <div className="mt-4 flex items-center justify-between">
+
+  <h1 className="text-5xl font-bold tracking-tight">
+    Improve your resume with AI.
+  </h1>
+
+  <Link
+    href="/resume-history"
+    className="rounded-xl border border-white/10 px-5 py-3 text-sm font-medium transition hover:border-cyan-400 hover:text-cyan-400"
+  >
+    View History →
+  </Link>
+
+</div>
 
       <p className="mt-5 max-w-2xl text-lg leading-8 text-zinc-400">
         Upload your resume and receive an ATS score,

@@ -78,31 +78,51 @@ export default function ATSPage() {
     }
   };
     return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-white">
-      <div className="mx-auto max-w-6xl">
+    <main className="min-h-screen bg-[#09090B] text-white">
+      <div className="mx-auto max-w-7xl px-6 py-12">
 
         <Link
           href="/"
-          className="text-cyan-300 hover:underline"
+          className="text-zinc-500 transition hover:text-white"
         >
           ← Back to Home
         </Link>
+  <div className="mt-8">
 
-        <div className="mt-6">
-          <h1 className="text-4xl font-bold">
-            ATS Resume Matcher
-          </h1>
+  <div className="flex items-start justify-between gap-8">
 
-          <p className="mt-3 text-slate-300">
-            Upload your resume and compare it with a Job Description using AI.
-          </p>
-        </div>
+    <div>
+
+      <p className="text-sm uppercase tracking-[0.25em] text-cyan-400">
+        ATS Match
+      </p>
+
+      <h1 className="mt-4 text-5xl font-bold tracking-tight">
+        Optimize your resume.
+      </h1>
+
+      <p className="mt-5 max-w-2xl text-lg leading-8 text-zinc-400">
+        Compare your resume against a Job Description and receive an AI-powered ATS compatibility report.
+      </p>
+
+    </div>
+
+    <Link
+      href="/ats-history"
+      className="rounded-xl border border-white/10 px-5 py-3 text-sm font-medium transition hover:border-cyan-400 hover:text-cyan-400 whitespace-nowrap"
+    >
+      View History →
+    </Link>
+
+  </div>
+
+</div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
 
           {/* Left Panel */}
 
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+          <div className="rounded-[28px] border border-white/5 bg-[#111113] p-8">
 
             <h2 className="text-2xl font-semibold">
               Upload Resume
@@ -165,7 +185,7 @@ export default function ATSPage() {
 
             {!result ? (
 
-              <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+              <div className="rounded-[28px] border border-white/5 bg-[#111113] p-8">
 
                 <h2 className="text-2xl font-semibold">
                   ATS Report
@@ -181,13 +201,13 @@ export default function ATSPage() {
 
               <>
 
-                <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+                <div className="rounded-[28px] border border-white/5 bg-[#111113] p-8">
 
                   <h2 className="text-2xl font-semibold">
                     ATS Score
                   </h2>
 
-                  <p className="mt-4 text-5xl font-bold text-cyan-300">
+                  <p className="mt-8 text-7xl font-bold text-cyan-400">
                     {result.ats_score}/100
                   </p>
 
@@ -195,8 +215,8 @@ export default function ATSPage() {
 
                 <div className="grid gap-4 md:grid-cols-2">
 
-                  <div className="rounded-2xl bg-slate-900 p-5">
-
+                  <div className="rounded-3xl bg-[#09090B] p-6">
+              
                     <p className="font-semibold text-green-400">
                       Matched Skills
                     </p>
@@ -213,7 +233,7 @@ export default function ATSPage() {
 
                   </div>
 
-                  <div className="rounded-2xl bg-slate-900 p-5">
+                  <div className="rounded-3xl bg-[#09090B] p-6">
 
                     <p className="font-semibold text-red-400">
                       Missing Skills
@@ -233,7 +253,7 @@ export default function ATSPage() {
 
                 </div>
 
-                <div className="rounded-2xl bg-slate-900 p-5">
+                <div className="rounded-3xl bg-[#09090B] p-6">
 
                   <p className="font-semibold text-green-400">
                     Strengths
@@ -251,7 +271,7 @@ export default function ATSPage() {
 
                 </div>
 
-                <div className="rounded-2xl bg-slate-900 p-5">
+                <div className="rounded-3xl bg-[#09090B] p-6">
 
                   <p className="font-semibold text-yellow-400">
                     Suggestions

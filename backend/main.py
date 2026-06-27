@@ -184,15 +184,16 @@ def resume_history():
         result = []
         for item in records:
             result.append(
-                {
-                    "id": item.id,
-                    "filename": item.filename,
-                    "score": item.score,
-                    "strengths": item.strengths,
-                    "improvements": item.improvements,
-                    "summary": item.summary,
-                }
-            )
+    {
+        "id": item.id,
+        "filename": item.filename,
+        "score": item.score,
+        "strengths": item.strengths,
+        "improvements": item.improvements,
+        "summary": item.summary,
+        "created_at": item.created_at,
+    }
+)
         return result
     finally:
         db.close()
@@ -234,6 +235,7 @@ def dashboard():
     try:
         resume_records = db.query(ResumeAnalysis).all()
         interview_records = db.query(InterviewHistory).all()
+        ats_records = db.query(ATSHistory).all()
 
         # Resume Analytics
         if resume_records:
@@ -273,15 +275,40 @@ def dashboard():
             highest_interview = 0
 
         return {
-            "total_resumes": len(resume_records),
-            "latest_resume_score": latest_resume.score if latest_resume else 0,
-            "average_resume_score": round(average_resume, 1),
 
-            "total_interviews": len(interview_records),
-            "latest_interview_score": latest_interview.score if latest_interview else 0,
-            "average_interview_score": round(average_interview, 1),
-            "highest_interview_score": highest_interview,
-        }
+    # Resume
+
+    "total_resumes": len(resume_records),
+
+    "latest_resume_score": latest_resume.score if latest_resume else 0,
+
+    "average_resume_score": round(average_resume, 1),
+
+    # Interview
+
+    "total_interviews": len(interview_records),
+
+    "latest_interview_score": latest_interview.score if latest_interview else 0,
+
+    "average_interview_score": round(average_interview, 1),
+
+    "highest_interview_score": highest_interview,
+
+    # ATS
+
+    "total_ats": len(ats_records),
+
+    "latest_ats_score":
+        ats_records[-1].ats_score if ats_records else 0,
+
+    "average_ats_score":
+        round(
+            sum(a.ats_score for a in ats_records) /
+            len(ats_records),
+            1
+        ) if ats_records else 0,
+
+}
 
     finally:
         db.close()
